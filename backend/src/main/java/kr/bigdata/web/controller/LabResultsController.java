@@ -81,6 +81,11 @@ public class LabResultsController {
 	    @GetMapping("/{visitId}/labs/abnormal")
 	    public ResponseEntity<List<AbnormalLabResultDto>> getAbnormalLabs(@PathVariable String visitId) {
 	        List<LabResults> labs = labResultsRepository.findByVisitIdOrderByLabTimeDesc(visitId);
+	        //TDD를 위해 검사 실패하면 404반환하는거 추가
+	        if (labs == null || labs.isEmpty()) {
+	            return ResponseEntity.notFound().build();
+	        }
+
 	        List<AbnormalLabResultDto> abnormalList = new ArrayList<>();
 
 	        // 전체 검사 이력(labs) 반복!
