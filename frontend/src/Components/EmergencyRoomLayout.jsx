@@ -470,7 +470,7 @@ const EmergencyRoomLayout = ({
 
       {/* 배정 해제 확인 모달 */}
       {showUnassignModal && unassignPatient && (
-        <div className="modal-overlay">
+        <div className="emergency-modal-overlay">
           <div className="modal-content">
             <div className="modal-header">
               <h3 className="modal-title">

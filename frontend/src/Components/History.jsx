@@ -126,7 +126,7 @@ export default function History({ patient, onClose }) {
     <div className="patient-modal">
       <div className="patient-modal-content">
         {/* 상단: 환자 정보 + 닫기 버튼 */}
-        <div className="modal-header">
+        <div className="history-modal-header">
           <div className="modal-title-combined">
             <span className="patient-name">{patientName}</span>
             <span className="patient-id">[{patientPid}]</span>

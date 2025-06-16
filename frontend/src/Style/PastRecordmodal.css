@@ -1,18 +1,21 @@
-/* PastRecordmodal.css - 과거 기록 모달 전용 CSS */
+/* PastRecordmodal.css - 고유한 클래스명으로 충돌 방지 */
 
-/* 모달 오버레이 */
-.modal-overlay {
+/* 모달 오버레이 - 고유 클래스명 사용 */
+.past-modal-overlay {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
+  width: 100vw;
+  height: 100vh;
   background-color: rgba(0, 0, 0, 0.5);
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 1000;
+  z-index: 99999;
   padding: 20px;
+  box-sizing: border-box;
 }
 
 /* 모달 컨테이너 */
@@ -26,10 +29,12 @@
   flex-direction: column;
   overflow: hidden;
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+  position: relative;
+  z-index: 100000;
 }
 
 /* 모달 헤더 */
-.modal-header {
+.past-modal-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -38,14 +43,14 @@
   background-color: #f8fafc;
 }
 
-.modal-title {
+.past-modal-title {
   font-size: 20px;
   font-weight: bold;
   color: #111827;
   margin: 0;
 }
 
-.close-button {
+.past-close-button {
   background: none;
   border: none;
   cursor: pointer;
@@ -54,32 +59,25 @@
   transition: background-color 0.2s;
 }
 
-.close-button:hover {
+.past-close-button:hover {
   background-color: rgba(0, 0, 0, 0.1);
 }
 
-.close-icon {
+.past-close-icon {
   width: 20px;
   height: 20px;
   color: #6b7280;
 }
 
 /* 모달 내용 */
-.modal-content {
+.past-modal-content {
   flex: 1;
   padding: 20px;
   overflow-y: auto;
 }
 
-.modal-description {
-  font-size: 14px;
-  color: #6b7280;
-  margin: 0 0 20px 0;
-  text-align: center;
-}
-
 /* 로딩 및 에러 상태 */
-.loading-container {
+.past-loading-container {
   display: flex;
   justify-content: center;
   align-items: center;
@@ -87,20 +85,20 @@
   color: #6b7280;
 }
 
-.error-container {
+.past-error-container {
   display: flex;
   justify-content: center;
   align-items: center;
   padding: 40px;
 }
 
-.error-message {
+.past-error-message {
   color: #ef4444;
   font-size: 14px;
 }
 
-/* 🎯 데이터 없음 메시지 */
-.no-records-message {
+/* 데이터 없음 메시지 */
+.past-no-records-container {
   display: flex;
   justify-content: center;
   align-items: center;
@@ -109,12 +107,12 @@
   font-style: italic;
 }
 
-.no-records-message p {
+.past-no-records-container p {
   margin: 0;
   font-size: 16px;
 }
 
-/* 🎯 Detail.jsx History 섹션과 동일한 테이블 구조 */
+/* 테이블 구조 */
 .past-records-table {
   border-radius: 15px;
   overflow: hidden;
@@ -155,8 +153,8 @@
   text-overflow: ellipsis;
 }
 
-/* 🎯 KTAS 배경색 */
-.ktas-text {
+/* KTAS 배경색 */
+.past-ktas-text {
   padding: 3px 4px;
   margin: 0 auto;
   border-radius: 4px;
@@ -168,76 +166,69 @@
   width: 20px;
 }
 
-.ktas-1 {
-  background-color: #dc2626;
-  /* 빨간색 - 응급 */
+.past-ktas-1 {
+  background-color: #dc2626; /* 빨간색 - 응급 */
 }
 
-.ktas-2 {
-  background-color: #ea580c;
-  /* 주황색 - 긴급 */
+.past-ktas-2 {
+  background-color: #ea580c; /* 주황색 - 긴급 */
 }
 
-.ktas-3 {
-  background-color: #eab308;
-  /* 노란색 - 준긴급 */
+.past-ktas-3 {
+  background-color: #eab308; /* 노란색 - 준긴급 */
 }
 
-.ktas-4 {
-  background-color: #16a34a;
-  /* 초록색 - 덜 긴급 */
+.past-ktas-4 {
+  background-color: #16a34a; /* 초록색 - 덜 긴급 */
 }
 
-.ktas-5 {
-  background-color: #2563eb;
-  /* 파란색 - 비응급 */
+.past-ktas-5 {
+  background-color: #2563eb; /* 파란색 - 비응급 */
 }
 
 /* 통계 섹션 */
-.statistics-section {
+.past-statistics-section {
   background-color: #f8fafc;
   border-radius: 8px;
   padding: 20px;
   border: 1px solid #e5e7eb;
 }
 
-.statistics-section h3 {
+.past-statistics-section h3 {
   font-size: 16px;
   font-weight: bold;
   color: #111827;
   margin: 0 0 15px 0;
 }
 
-.stats-grid {
+.past-stats-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: 15px;
 }
 
-.stat-item {
+.past-stat-item {
   display: flex;
   flex-direction: column;
   gap: 4px;
 }
 
-.stat-label {
-  font-size: 20px;
+.past-stat-label {
+  font-size: 14px;
   line-height: 18px;
-  font-weight: 700;
-  color: #000000;
-  cursor: pointer;
-  transition: opacity 0.2s;
+  font-weight: 600;
+  color: #374151;
   white-space: nowrap;
 }
 
-.stat-value {
+.past-stat-value {
   font-size: 16px;
   color: #111827;
   font-weight: bold;
 }
 
 /* 모달 푸터 */
-.modal-footer {
+.past-modal-footer {
   display: flex;
   justify-content: center;
   padding: 20px;
@@ -245,7 +236,7 @@
   background-color: #f8fafc;
 }
 
-.btn-secondary {
+.past-btn-secondary {
   background-color: #6b7280;
   color: white;
   border: none;
@@ -257,7 +248,7 @@
   transition: background-color 0.2s;
 }
 
-.btn-secondary:hover {
+.past-btn-secondary:hover {
   background-color: #4b5563;
 }
 
@@ -268,15 +259,15 @@
     max-height: 95vh;
   }
 
-  .modal-header {
+  .past-modal-header {
     padding: 15px;
   }
 
-  .modal-title {
+  .past-modal-title {
     font-size: 18px;
   }
 
-  .modal-content {
+  .past-modal-content {
     padding: 15px;
   }
 
@@ -287,38 +278,25 @@
     font-size: 11px;
   }
 
-  .ktas-text {
+  .past-ktas-text {
     padding: 2px 4px;
     font-size: 10px;
   }
 
-  /* Stats cards - 개선된 반응형 */
-  .stats-grid {
-    display: flex;
-    gap: 2rem;
-    margin-bottom: 1.5rem;
-    justify-content: center;
-    align-items: center;
-    flex-wrap: nowrap;
-    /* 기본적으로 일자 배열 */
-    overflow-x: auto;
-  }
-
-  .modal-footer {
+  .past-modal-footer {
     padding: 15px;
   }
 
-  .no-records-message {
+  .past-no-records-container {
     padding: 30px;
   }
 
-  .no-records-message p {
+  .past-no-records-container p {
     font-size: 14px;
   }
 }
 
 @media (max-width: 480px) {
-
   .past-records-table-header,
   .past-records-table-row {
     grid-template-columns: 70px 70px 40px 40px 40px 1fr 80px;
@@ -326,12 +304,12 @@
     padding: 8px;
   }
 
-  .ktas-text {
+  .past-ktas-text {
     padding: 1px 2px;
     font-size: 9px;
   }
 
-  .stats-grid {
+  .past-stats-grid {
     grid-template-columns: 1fr;
   }
 }

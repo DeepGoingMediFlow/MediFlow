@@ -1,6 +1,6 @@
 import React from "react";
 import { X } from "lucide-react";
-import "../Style/EditModal.css";
+import "../Style/Editmodal.css";
 
 const EditModal = ({ value, onChange, onClose, onSubmit }) => {
   return (

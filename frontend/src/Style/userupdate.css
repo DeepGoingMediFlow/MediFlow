@@ -218,22 +218,6 @@
   background-color: #374151;
 }
 
-.modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  background-color: rgba(0, 0, 0, 0.3);
-  /* 어두운 반투명 배경 */
-  display: flex;
-  justify-content: center;
-  /* 가로 중앙 */
-  align-items: center;
-  /* 세로 중앙 */
-  z-index: 9999;
-  /* 맨 위에 보이도록 */
-}
 
 /* 반응형 */
 @media (max-width: 480px) {

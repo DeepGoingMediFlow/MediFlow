@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import "../Style/Detail.css";
+import "../Style/detail.css";
 import { useParams, useLocation, useNavigate } from 'react-router-dom';
 import { ArrowLeft, User, ChevronLeft, ChevronRight } from 'lucide-react';
 import axios from "axios";
