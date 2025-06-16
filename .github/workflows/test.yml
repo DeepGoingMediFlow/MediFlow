@@ -1,10 +1,11 @@
 # .github/workflows/test.yml
 
-name: Run Spring Boot Tests  # 이 이름 중요! 브랜치 보호 규칙에 입력해야 함
+name: Run Spring Boot Tests
 
 on:
   pull_request:
-    branches: [ "main" ]  # main 브랜치로 PR이 열릴 때만 작동
+    branches: [ "main" ]
+
 
 jobs:
   test:
@@ -20,8 +21,6 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: Grant execute permission for Maven wrapper
-        run: chmod +x ./mvnw
+      - name: Run tests  # 🛠️ 수정한 부분
+        run: mvn test     # mvnw → mvn 으로 변경
 
-      - name: Run tests
-        run: ./mvnw test
