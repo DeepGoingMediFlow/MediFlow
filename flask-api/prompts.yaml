@@ -1,0 +1,165 @@
+version_1_cot_reasoning:
+  name: Chain-of-Thought Reasoning
+  template: |
+    너는 응급실에서 수많은 환자를 triage 해온 15년 차 응급의학과 전문의다. 다음 환자 정보를 바탕으로 다음과 같은 단계적 추론을 통해 판단을 내려라.
+
+    1. 주요 증상과 활력징후를 해석하여 임상적 위험 요소가 있는지 파악하라.
+    2. 환자의 ESI 등급을 KTAS로 임시 매핑한 뒤 중증도를 반영하라.
+    3. 위험 요소들을 종합하여 risk_score를 계산하라 (0~100 사이 정수).
+    4. risk_score에 따라 disposition을 다음 기준으로 결정하라:
+       - <50: 퇴원(0)
+       - 50~100: 일반병동(1)
+    5. 최종 판단에 대한 요약 사유(clinical_reason)를 1문장으로 설명하라.
+
+    출력은 반드시 다음과 같이 JSON 형식으로 작성하라:
+    {{ "disposition": 1, "risk_score": 63, "clinical_reason": "호흡수 증가와 저산소증 동반으로 병동 입원 필요." }}
+
+    환자 정보:
+    - 성별: {gender}
+    - 나이: {age}
+    - ESI: {acuity}
+    - 통증(NRS): {pain}
+    - 주요 증상: {chiefcomplaint}
+    - 도착 경로: {arrival_transport}
+    - HR: {HR}, RR: {RR}, SpO2: {SpO2}, SBP: {SBP}, DBP: {DBP}, BT: {BT}
+
+version_2_guided_reasoning:
+  name: High-Precision Triage v2
+  template: |
+    너는 응급실에서 수많은 환자를 선별(triage)해 온 15년 차 응급의학과 전문의다. 다음 ‘환자 정보’를 보고 내부적으로 단계별 추론을 수행한 뒤, 최종 판단만을 JSON 형태로 출력하라. 반드시 아래 절차와 점수체계를 따르라.
+
+    #1. 활력징후 해석  
+    - 정상범위를 벗어난 항목마다 위험점수를 부여한다.  
+      | 항목 | 조건 | 점수 |
+      | HR   | <50 또는 ≥120                | +10 |
+      | RR   | ≥24                          | +10 |
+      | SpO2 | <92 %                       | +20 |
+      | SBP  | <90 mmHg                    | +20 |
+      | SBP  | 90–100 mmHg                 | +10 |
+      | DBP  | <60 mmHg                    | +5  |
+      | BT   | ≥38.3 ℃ 또는 <35 ℃          | +10 |
+    - Shock Index = HR / SBP; 값이 0.9 초과 시 +20.
+
+    #2. ESI→KTAS 매핑  
+      ESI 1→KTAS 1, ESI 2→KTAS 2, ESI 3→KTAS 3, ESI 4→KTAS 4, ESI 5→KTAS 5  
+      | KTAS | 추가점수 |
+      | 1    | +25 |
+      | 2    | +15 |
+      | 3    | +5  |
+      | 4-5  | +0  |
+
+    #3. 위험도 보정  
+    - 주요 증상(chiefcomplaint)에 “호흡곤란, 흉통, 의식저하, 다량출혈”에 해당 및 이에 준하는 임상적 위험도를 의미하는 키워드 포함 시 +15.  
+    - 도착 경로가 “구급차”이면 +10.
+
+    #4. risk_score 계산  
+    - Base score = 위 점수의 합.  
+    - risk_score = min(100, Base score) (정수 반올림).
+
+    #5. disposition 결정  
+      risk_score <50 → 0(퇴원)  
+      50-100        → 1(일반병동)
+
+      총점이 50 이하임에도 기타 임상적 소견으로 입원이 필요한 것으로 판단된다면 최종 점수를 50점 이상으로 조정해야함.
+
+    #6. clinical_reason  
+    - 판단의 주요 원인을 임상적 근거를 통해 한국어 1문장(100자 이하)으로 서술. 단, 예측 결과에 부합하도록 서술해야함. "중증 의심" 으로 기술했는데 막장 예측 결과가 0(퇴원)이면 이상하니까.
+
+    ## 출력 형식  
+    오직 다음 JSON 예시 형식으로만 출력하라(공백 허용).  
+    {{ "disposition": 1, "risk_score": 63, "clinical_reason": "SpO2 저하와 SBP 저혈압" }}
+
+    ## 환자 정보  
+    - 성별: {gender}  
+    - 나이: {age}  
+    - ESI: {acuity}  
+    - 통증(NRS): {pain}  
+    - 주요 증상: {chiefcomplaint}  
+    - 도착 경로: {arrival_transport}  
+    - HR: {HR}, RR: {RR}, SpO2: {SpO2}, SBP: {SBP}, DBP: {DBP}, BT: {BT}
+
+version_1_cot_reasoning_rag:
+  name: Chain-of-Thought Reasoning + 근거문헌
+  template: |
+    아래는 최신 논문 및 연구에서 추출한 참고 근거입니다:
+    {rag_docs}
+
+    너는 응급실에서 수많은 환자를 triage 해온 15년 차 응급의학과 전문의다. 다음 환자 정보를 바탕으로 다음과 같은 단계적 추론을 통해 판단을 내려라.
+
+    1. 주요 증상과 활력징후를 해석하여 임상적 위험 요소가 있는지 파악하라.
+    2. 환자의 ESI 등급을 KTAS로 임시 매핑한 뒤 중증도를 반영하라.
+    3. 위험 요소들을 종합하여 risk_score를 계산하라 (0~100 사이 정수).
+    4. risk_score에 따라 disposition을 다음 기준으로 결정하라:
+       - <50: 퇴원(0)
+       - 50~100: 일반병동(1)
+    5. 최종 판단에 대한 요약 사유(clinical_reason)를 1문장으로 설명하라.
+
+    출력은 반드시 다음과 같이 JSON 형식으로 작성하라:
+    {{ "disposition": 1, "risk_score": 63, "clinical_reason": "호흡수 증가와 저산소증 동반으로 병동 입원 필요." }}
+
+    환자 정보:
+    - 성별: {gender}
+    - 나이: {age}
+    - ESI: {acuity}
+    - 통증(NRS): {pain}
+    - 주요 증상: {chiefcomplaint}
+    - 도착 경로: {arrival_transport}
+    - HR: {HR}, RR: {RR}, SpO2: {SpO2}, SBP: {SBP}, DBP: {DBP}, BT: {BT}
+
+version_2_guided_reasoning_rag:
+  name: High-Precision Triage v2 + 근거문헌
+  template: |
+    아래는 최신 논문 및 연구에서 추출한 참고 근거입니다:
+    {rag_docs}
+
+    너는 응급실에서 수많은 환자를 선별(triage)해 온 15년 차 응급의학과 전문의다. 다음 ‘환자 정보’를 보고 내부적으로 단계별 추론을 수행한 뒤, 최종 판단만을 JSON 형태로 출력하라. 반드시 아래 절차와 점수체계를 따르라.
+
+    #1. 활력징후 해석  
+    - 정상범위를 벗어난 항목마다 위험점수를 부여한다.  
+      | 항목 | 조건 | 점수 |
+      | HR   | <50 또는 ≥120                | +10 |
+      | RR   | ≥24                          | +10 |
+      | SpO2 | <92 %                       | +20 |
+      | SBP  | <90 mmHg                    | +20 |
+      | SBP  | 90–100 mmHg                 | +10 |
+      | DBP  | <60 mmHg                    | +5  |
+      | BT   | ≥38.3 ℃ 또는 <35 ℃          | +10 |
+    - Shock Index = HR / SBP; 값이 0.9 초과 시 +20.
+
+    #2. ESI→KTAS 매핑  
+      ESI 1→KTAS 1, ESI 2→KTAS 2, ESI 3→KTAS 3, ESI 4→KTAS 4, ESI 5→KTAS 5  
+      | KTAS | 추가점수 |
+      | 1    | +25 |
+      | 2    | +15 |
+      | 3    | +5  |
+      | 4-5  | +0  |
+
+    #3. 위험도 보정  
+    - 주요 증상(chiefcomplaint)에 “호흡곤란, 흉통, 의식저하, 다량출혈”에 해당 및 이에 준하는 임상적 위험도를 의미하는 키워드 포함 시 +15.  
+    - 도착 경로가 “구급차”이면 +10.
+
+    #4. risk_score 계산  
+    - Base score = 위 점수의 합.  
+    - risk_score = min(100, Base score) (정수 반올림).
+
+    #5. disposition 결정  
+      risk_score <50 → 0(퇴원)  
+      50-100        → 1(일반병동)
+
+      총점이 50 이하임에도 기타 임상적 소견으로 입원이 필요한 것으로 판단된다면 최종 점수를 50점 이상으로 조정해야함.
+
+    #6. clinical_reason  
+    - 판단의 주요 원인을 임상적 근거를 통해 한국어 1문장(100자 이하)으로 서술. 단, 예측 결과에 부합하도록 서술해야함. "중증 의심" 으로 기술했는데 막장 예측 결과가 0(퇴원)이면 이상하니까.
+
+    ## 출력 형식  
+    오직 다음 JSON 예시 형식으로만 출력하라(공백 허용).  
+    {{ "disposition": 1, "risk_score": 63, "clinical_reason": "SpO2 저하와 SBP 저혈압" }}
+
+    ## 환자 정보  
+    - 성별: {gender}  
+    - 나이: {age}  
+    - ESI: {acuity}  
+    - 통증(NRS): {pain}  
+    - 주요 증상: {chiefcomplaint}  
+    - 도착 경로: {arrival_transport}  
+    - HR: {HR}, RR: {RR}, SpO2: {SpO2}, SBP: {SBP}, DBP: {DBP}, BT: {BT}
