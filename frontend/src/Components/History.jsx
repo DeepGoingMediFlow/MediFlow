@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { X } from "lucide-react";
-import '../Style/history.css';
+import '../Style/History.css';
 import axios from "axios";
 import EditModal from '../Pages/EditModal'; 
 
