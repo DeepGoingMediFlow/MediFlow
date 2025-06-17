@@ -40,7 +40,7 @@ public class MedicalHistoryControllerTest {
 
     @Test
     void testUpdateHistory_shouldSucceed() throws Exception {
-        Long historyId = 1L; // 실제 존재하는 ID로 바꿔야 함
+        Long historyId = 6L; // 실제 존재하는 ID로 바꿔야 함
         String json = """
             {
                 "content": "수정된 내용입니다"
@@ -57,7 +57,7 @@ public class MedicalHistoryControllerTest {
 
     @Test
     void testDeleteHistory_shouldSucceed() throws Exception {
-        Long historyId = 1L; // 삭제 가능한 실제 ID
+        Long historyId = 6L; // 삭제 가능한 실제 ID
 
         mockMvc.perform(delete("/api/history/" + historyId))
             .andExpect(status().isOk());
