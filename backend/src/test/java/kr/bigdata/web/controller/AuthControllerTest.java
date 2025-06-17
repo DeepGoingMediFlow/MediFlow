@@ -40,4 +40,5 @@ public class AuthControllerTest {
             .andExpect(jsonPath("$.userName", containsString("김민주")))
             .andExpect(jsonPath("$.userRole").value("의사"));
     }
+    // 테스트용
 }
