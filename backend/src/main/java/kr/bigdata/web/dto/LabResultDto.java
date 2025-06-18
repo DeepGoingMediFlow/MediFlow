@@ -44,5 +44,26 @@ public class LabResultDto {
     private Double inrPt;
     private Double ptt;
     private Double dDimer;
+    private Double troponinT;
+    private Double ck;
+    private Double ckmb;
+    private Double ntprobnp;
+    private Double amylase;
+    private Double lipase;
+    private Double ph;
+    private Double pco2;
+    private Double po2;
+    private Double ctco2;
+    private Double bcb;
+    
+    // VitalSign 필드
+    private Long recordId;
+    private LocalDateTime recordTime;
+    private Integer hr;
+    private Integer rr;
+    private Double spo2;
+    private Integer sbp;
+    private Integer dbp;
+    private Double bt;
 
 }

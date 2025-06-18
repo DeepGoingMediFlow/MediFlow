@@ -113,20 +113,41 @@ function Detail() {
 
   useEffect(() => {
     if (visitId) {
-      axios.post(`http://localhost:8081/api/visits/${visitId}/predict/admission`,
-        {},
-        { withCredentials: true }
-      )
+      // 1차 에측 자동 get
+      axios.get(`http://localhost:8081/api/visits/${visitId}/predictions/admission`, {
+        withCredentials: true
+      })
         .then(res => {
           setPrediction(res.data.preDisposition);
           setPredictionReason(res.data.reason);
           setPredictionScore(res.data.preScore);
         })
-        .catch(err => setPrediction('예측 실패'));
+        .catch(err => setPrediction('예측 없음'));
+
+      // 2차 예측 조회
+       axios.get(`http://localhost:8081/api/visits/${visitId}/predictions`, { withCredentials: true })
+      .then(res => {
+        if (res.data) {
+          setDischargePrediction(res.data.preDisposition);
+          setDischargeReason(res.data.reason);
+          setButtonState('final'); // <-- 여기가 중요! 데이터 있으면 바로 'final'로!
+        } else {
+          setDischargePrediction('');
+          setDischargeReason('');
+          setButtonState('predict'); // 데이터 없으면 버튼 활성화
+        }
+      })
+      .catch(() => {
+        setDischargePrediction('');
+        setDischargeReason('');
+        setButtonState('predict');
+      });
     }
   }, [visitId]);
 
   useEffect(() => {
+     console.log('===> visitId for available beds:', visitId);
+
     axios.get(`http://localhost:8081/api/visits/${visitId}/available-beds`, {
       withCredentials: true
     })
@@ -334,14 +355,14 @@ function Detail() {
                   <div className="prediction-item">
                     <span className="label">1차 예측:</span>
                     <span className="value">{renderPrediction()}</span>
-                    {!(bedInfo === 0 && bedTotal === 0) && (
+                    {bedInfo !== null && bedTotal !== null && (
                       <span className="sub-value">(가용 병상 수: {bedInfo}/{bedTotal})</span>
                     )}
                   </div>
                   <div className="prediction-item">
                     <span className="label">2차 예측:</span>
                     <span className="value">{renderDischargePrediction()}</span>
-                    {buttonState === 'final' && !(bedInfo === 0 && bedTotal === 0) && (
+                    {buttonState === 'final' && bedInfo !== null && bedTotal !== null && (
                       <span className="sub-value">(가용 병상 수: {bedInfo}/{bedTotal})</span>
                     )}
                   </div>
