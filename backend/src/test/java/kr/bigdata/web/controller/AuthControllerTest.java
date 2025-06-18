@@ -17,7 +17,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @AutoConfigureMockMvc
 public class AuthControllerTest {
-
+// tdd ㄹㅇ마지막테스트할라고 주석넣음
     @Autowired
     private MockMvc mockMvc;
 
