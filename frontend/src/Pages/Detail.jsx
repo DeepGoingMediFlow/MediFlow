@@ -113,7 +113,7 @@ function Detail() {
 
   useEffect(() => {
     if (visitId) {
-      // 1차 에측 자동 get
+      // 1차 예측 조회
       axios.get(`http://localhost:8081/api/visits/${visitId}/predictions/admission`, {
         withCredentials: true
       })
@@ -125,7 +125,7 @@ function Detail() {
         .catch(err => setPrediction('예측 없음'));
 
       // 2차 예측 조회
-       axios.get(`http://localhost:8081/api/visits/${visitId}/predictions`, { withCredentials: true })
+       axios.get(`http://localhost:8081/api/visits/${visitId}/predictions/discharge`, { withCredentials: true })
       .then(res => {
         if (res.data) {
           setDischargePrediction(res.data.preDisposition);
