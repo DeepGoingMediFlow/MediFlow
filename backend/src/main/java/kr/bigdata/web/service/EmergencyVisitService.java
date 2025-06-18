@@ -61,7 +61,7 @@ public class EmergencyVisitService {
 		}
 	}
 
-	// 2차 예측
+	// 최종 배치
 	@Transactional
 	public void finalizeDisposition(String visitId, Integer disposition, String reason) {
 		// 1. EMERGENCY_VISIT 테이블에서 방문 정보 찾기
@@ -72,13 +72,14 @@ public class EmergencyVisitService {
 		EmergencyVisit visit = optVisit.get();
 
 		 // 퇴실시간 저장 + 침대 해제
-        if (disposition != null && disposition == 0) {
+        if (disposition != null && (disposition == 0 || disposition == 1 || disposition == 2)) {
             String bedNumber = visit.getBedNumber();
+            visit.setDischargeTime(LocalDateTime.now());
+            
             if (bedNumber != null && !bedNumber.isEmpty()) {
                 releaseERBed(bedNumber);
                 visit.setBedNumber(null); // 배정 해제!
             }
-            visit.setDischargeTime(LocalDateTime.now());
         }
 
 		// 일반/ICU 배치 때 available_beds 감소
@@ -93,6 +94,7 @@ public class EmergencyVisitService {
 		}
 
 		// DB 저장
+		visit.setStatus("DISCHARGED");
 		emergencyVisitRepository.save(visit);
 
 		// 4. MedicalHistory 테이블 content에 resaon 저장
@@ -140,11 +142,11 @@ public class EmergencyVisitService {
 		return new BedStatusDto(wardType, bed.getAvailableCount(), bed.getTotalBeds());
 	}
 
-	// 최종 배치
+	// 최종 배치 수정
 	@Transactional
 	public void updateDisposition(String visitId, Integer disposition, String reason) {
 
-		// 1. 파라미터 확인
+		// 파라미터 확인
 		System.out.println("=== updateDisposition 호출됨 ===");
 		System.out.println("visitId: " + visitId + ", disposition: " + disposition);
 
@@ -159,20 +161,19 @@ public class EmergencyVisitService {
 		visit.setStatus("DISCHARGED");
 		
 		 // 응급실 침대 available
-        if (disposition != null && disposition == 0) {
+        if (disposition != null && (disposition == 0 || disposition == 1 || disposition == 2)) {
             String bedNumber = visit.getBedNumber();
+            visit.setDischargeTime(LocalDateTime.now());
             if (bedNumber != null && !bedNumber.isEmpty()) {
                 releaseERBed(bedNumber);
                 visit.setBedNumber(null); // 배정 해제!
             }
-            visit.setDischargeTime(LocalDateTime.now());
         }
 
 		// 응급실 침대 occupied
 		if (disposition != null && (disposition == 1 || disposition == 2)) {
 			occupyERBed(visit.getBedNumber());
 		}
-
 
 		// 전체 병동 병상 복구(+1)
 		if (prevDisposition != null && (prevDisposition == 1 || prevDisposition == 2)) {
@@ -204,11 +205,6 @@ public class EmergencyVisitService {
 		System.out.println("직전 finalDisposition: " + visit.getFinalDisposition());
 		visit.setFinalDisposition(disposition);
 		System.out.println("변경 후 finalDisposition: " + visit.getFinalDisposition());
-
-		// 퇴실시간 저장
-		if (disposition != null && disposition == 0) {
-			visit.setDischargeTime(LocalDateTime.now());
-		}
 
 		emergencyVisitRepository.save(visit);
 		System.out.println("emergencyVisitRepository.save(visit) 호출 완료!");

@@ -86,7 +86,7 @@ public class AiPredictionService {
 	        dto.setVisitId(prediction.getEmergencyVisit().getVisitId());
 	        dto.setPreTime(prediction.getPreTime());
 
-	        // ↓↓↓ 병상 정보까지 한 번에 세팅
+	        // 병상 정보 
 	        Integer disp = dto.getPreDisposition();
 	        String wardType = null;
 	        if (disp != null && disp != 0) {
@@ -116,6 +116,15 @@ public class AiPredictionService {
  
 	// 1차 예측: 입실 시
 	public AiPrediction predictAdmission(String visitId) {
+		
+		 // DB에 예측값 있으면 DB값 반환, Flask 호출 X
+	    AiPrediction existing = aiPredictionRepository
+	    		.findByEmergencyVisit_VisitIdAndPreType(visitId, "admission").orElse(null);
+	    if (existing != null) {
+	        return existing;
+	    }
+	    
+	    // DB값 없으면 flask 호출
 		EmergencyVisit visit = emergencyVisitRepository.findById(visitId)
 				.orElseThrow(() -> new IllegalArgumentException("방문 정보 없음"));
 
@@ -130,7 +139,7 @@ public class AiPredictionService {
 		req.setChiefComplaint(visit.getChiefComplaint());
 		req.setArrivalTransport(visit.getArrivalTransport());
 
-		// ⬇️ 여기서 Flask 호출 → LLMResultWrapper로 받기!
+		// Flask 호출 → LLMResultWrapper로 받기!
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.APPLICATION_JSON);
 		HttpEntity<PatientRequest> requestEntity = new HttpEntity<>(req, headers);
@@ -140,21 +149,26 @@ public class AiPredictionService {
 
 		LLMResult llmResult = response.getBody().getResult();
 
-		AiPrediction prediction = new AiPrediction();
-		prediction.setEmergencyVisit(visit);
-		prediction.setPreType("admission");
-		prediction.setPreDisposition(Integer.valueOf(llmResult.getDisposition())); // 반드시 int!
-		prediction.setPreScore(llmResult.getRiskScore()); // Integer라면 바로 할당!
-		prediction.setReason(llmResult.getClinicalReason());
-		prediction.setPreTime(java.time.LocalDateTime.now());
-
-		return saveOrUpdatePrediction(visit, "admission", Integer.valueOf(llmResult.getDisposition()),
-				llmResult.getRiskScore(), llmResult.getClinicalReason());
+		 // Flask 결과를 DB에 저장
+        return saveOrUpdatePrediction(
+            visit,
+            "admission",
+            Integer.valueOf(llmResult.getDisposition()),
+            llmResult.getRiskScore(),
+            llmResult.getClinicalReason()
+        );
 
 	}
 
 	// 2차 예측: 퇴실/최종
 	public AiPrediction predictDischarge(String visitId) {
+		 // DB에 예측값 있으면 반환 Flask 호출 X
+	    AiPrediction existing = aiPredictionRepository
+	    		.findByEmergencyVisit_VisitIdAndPreType(visitId, "discharge").orElse(null);
+	    if (existing != null) {
+	        return existing;
+	    }
+	    // 값 없으면 flask 호출
 		EmergencyVisit visit = emergencyVisitRepository.findById(visitId)
 				.orElseThrow(() -> new IllegalArgumentException("방문 정보 없음"));
 		Patient patient = visit.getPatient();
@@ -171,7 +185,7 @@ public class AiPredictionService {
 		req.setChiefComplaint(visit.getChiefComplaint());
 		req.setArrivalTransport(visit.getArrivalTransport());
 
-		// 여러 행(labList) 중에서 원하는 행(보통 가장 최근 검사)을 1개만 뽑아 사용 (예시: 최신 행)
+		// 최신 검사 결과 1개만 저장
 		LabResults lab = null;
 		if (labList != null && !labList.isEmpty()) {
 			lab = labList.stream().max(java.util.Comparator.comparing(LabResults::getLabTime)) // 검사 시각이 최신인 행
@@ -232,21 +246,20 @@ public class AiPredictionService {
 
 		LLMResult llmResult = response.getBody().getResult();
 
-		AiPrediction prediction = new AiPrediction();
-		prediction.setEmergencyVisit(visit);
-		prediction.setPreType("discharge");
-		prediction.setPreDisposition(Integer.valueOf(llmResult.getDisposition())); // int로!
-		prediction.setPreScore(llmResult.getRiskScore()); // Integer라면 바로 할당!
-		prediction.setReason(llmResult.getClinicalReason());
-		prediction.setPreTime(java.time.LocalDateTime.now());
-
-		return saveOrUpdatePrediction(visit, "discharge", Integer.valueOf(llmResult.getDisposition()),
-				llmResult.getRiskScore(), llmResult.getClinicalReason());
+		 // Flask 결과를 DB에 저장
+        return saveOrUpdatePrediction(
+            visit,
+            "discharge",
+            Integer.valueOf(llmResult.getDisposition()),
+            llmResult.getRiskScore(),
+            llmResult.getClinicalReason()
+        );
+		
 	}
 
-	// 1차 예측 결과 조회
+	// 예측 결과 조회
 	public AiPrediction getPredictionByVisitIdAndPreType(String visitId, String preType) {
-	    return aiPredictionRepository.findTopByEmergencyVisit_VisitIdAndPreTypeOrderByPreTimeDesc(visitId, preType)
-	        .orElseThrow(() -> new IllegalArgumentException("예측 결과 없음"));
+        return aiPredictionRepository.findTopByEmergencyVisit_VisitIdAndPreTypeOrderByPreTimeDesc(visitId, preType)
+            .orElseThrow(() -> new IllegalArgumentException("예측 결과 없음"));
 	}
 }

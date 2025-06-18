@@ -37,23 +37,36 @@ public class AiPredictionController {
     }
     
     // 상세페이지에서 1차 예측만 조회
+    // 예측 값 없으면 자동 생성
     @GetMapping("/{visitId}/predictions/admission")
     public AiPredictionResponseDto getAdmissionPrediction(@PathVariable String visitId) {
-        AiPrediction prediction = aiPredictionService.getPredictionByVisitIdAndPreType(visitId, "admission");
+        AiPrediction prediction;
+        try {
+            // DB에서 찾기
+            prediction = aiPredictionService.getPredictionByVisitIdAndPreType(visitId, "admission");
+        } catch (IllegalArgumentException e) {
+            // 없으면 Flask로 예측 생성
+            prediction = aiPredictionService.predictAdmission(visitId);
+        }
         return aiPredictionService.toDtoWithBeds(prediction);
     }
     
-    // 2차 예측
+    // 2차 예측 조회
+    // DB 값 없으면 null로 내려보냄.
+    @GetMapping("/{visitId}/predictions")
+    public AiPredictionResponseDto getDischargePrediction(@PathVariable String visitId) {
+        try {
+            AiPrediction prediction = aiPredictionService.getPredictionByVisitIdAndPreType(visitId, "discharge");
+            return aiPredictionService.toDtoWithBeds(prediction);
+        } catch (IllegalArgumentException e) {
+            return null;
+        }
+    }
+    
+    // 2차 예측 생성 (의료진이 버튼 클릭 시 호출)
     @PostMapping("/{visitId}/predict/discharge")
     public AiPredictionResponseDto predictDischarge(@PathVariable String visitId) {
         AiPrediction prediction = aiPredictionService.predictDischarge(visitId);
-        return aiPredictionService.toDtoWithBeds(prediction);
-    }
-
-    // 예측 결과 조회
-    @GetMapping("/{visitId}/predictions")
-    public AiPredictionResponseDto getDischargePrediction(@PathVariable String visitId) {
-        AiPrediction prediction = aiPredictionService.getPredictionByVisitIdAndPreType(visitId, "discharge");
         return aiPredictionService.toDtoWithBeds(prediction);
     }
 }
