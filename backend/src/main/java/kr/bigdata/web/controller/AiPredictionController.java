@@ -53,14 +53,15 @@ public class AiPredictionController {
     
     // 2차 예측 조회
     // DB 값 없으면 null로 내려보냄.
-    @GetMapping("/{visitId}/predictions")
+    @GetMapping("/{visitId}/predictions/discharge")
     public AiPredictionResponseDto getDischargePrediction(@PathVariable String visitId) {
+    	AiPrediction prediction;
         try {
-            AiPrediction prediction = aiPredictionService.getPredictionByVisitIdAndPreType(visitId, "discharge");
-            return aiPredictionService.toDtoWithBeds(prediction);
+            prediction = aiPredictionService.getPredictionByVisitIdAndPreType(visitId, "discharge");
         } catch (IllegalArgumentException e) {
             return null;
         }
+        return aiPredictionService.toDtoWithBeds(prediction);
     }
     
     // 2차 예측 생성 (의료진이 버튼 클릭 시 호출)
