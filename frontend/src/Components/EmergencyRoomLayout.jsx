@@ -402,8 +402,8 @@ const EmergencyRoomLayout = ({
                       className={`patient-card ${loading ? 'disabled' : ''}`}
                       onClick={() => !loading && handlePatientAssign(patient)}
                     >
-                      <div className="patient-info">
-                        <div className="patient-header">
+                      <div className="add-patient-info">
+                        <div className="add-patient-header">
                           <span className="patient-name">
                             {patient.name}
                           </span>

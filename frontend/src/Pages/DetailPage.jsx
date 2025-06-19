@@ -6,6 +6,7 @@ import { useAuth } from '../Components/AuthContext';
 import PastRecordModal from '../Modals/PastRecordModal';
 import LabModal from '../Modals/LabModal';
 import FinalizeModal from '../Modals/FinalizeModal';
+import PredictionLoadingModal from '../Modals/PredictionLoadingModal';
 import UserIcon from '../assets/images/user-icon.png';
 import logoutIcon from '../assets/images/logout-icon.png';
 import "../Style/DetailPage.css";
@@ -54,6 +55,14 @@ function DetailPage() {
   const [editingHistoryValue, setEditingHistoryValue] = useState('');
   const [expandedHistoryId, setExpandedHistoryId] = useState(null);
   const [showHistoryInput, setShowHistoryInput] = useState(false);
+
+  // 로딩 상태
+  const [showPredictionLoading, setShowPredictionLoading] = useState(false);
+  const [loadingPredictionType, setLoadingPredictionType] = useState('1차');
+
+  const handlePredictionLoadingClose = () => {
+    setShowPredictionLoading(false);
+  };
 
   // 인증 확인
   useEffect(() => {
@@ -192,22 +201,22 @@ function DetailPage() {
     if (!visitId) return;
 
     setButtonState('loading');
+    setShowPredictionLoading(true); // 로딩 모달 표시
+    setLoadingPredictionType('2차'); // 2차 예측임을 표시
 
     axios.post(`http://localhost:8081/api/visits/${visitId}/predict/discharge`, {}, {
       withCredentials: true
     })
       .then(res => {
-        if (res.data &&
-          typeof res.data.preDisposition === 'number' &&
-          [0, 1, 2].includes(res.data.preDisposition)) {
+        if (res.data && typeof res.data.preDisposition === 'number' && [0, 1, 2].includes(res.data.preDisposition)) {
           setDischargePrediction(res.data.preDisposition);
           setDischargeReason(res.data.reason || '');
-          setDischargeScore(res.data.preScore || ''); // 2차 예측 점수 저장
+          setDischargeScore(res.data.preScore || '');
           setButtonState('final');
         } else {
           setDischargePrediction(null);
           setDischargeReason('데이터 오류');
-          setDischargeScore(''); // 2차 예측 점수 초기화
+          setDischargeScore('');
           setButtonState('predict');
         }
       })
@@ -215,8 +224,14 @@ function DetailPage() {
         console.error('2차 예측 실패:', err);
         setDischargePrediction(null);
         setDischargeReason('예측 실패');
-        setDischargeScore(''); // 2차 예측 점수 초기화
+        setDischargeScore('');
         setButtonState('predict');
+      })
+      .finally(() => {
+        // 여기서 바로 닫지 않고, 모달이 자동으로 최소 시간 후에 닫히도록 함
+        setTimeout(() => {
+          setShowPredictionLoading(false);
+        }, 500); // 추가 0.5초 대기
       });
   };
 
@@ -817,7 +832,7 @@ function DetailPage() {
                         등록
                       </button>
                       <button
-                        className="cancel-btn"
+                        className="history-cancel-btn"
                         onClick={() => {
                           setShowHistoryInput(false);
                           setNewHistoryInput('');
@@ -871,7 +886,7 @@ function DetailPage() {
                                   >
                                     저장
                                   </button>
-                                  <button className="cancel-btn" onClick={handleCancelEdit}>
+                                  <button className="history-cancel-btn" onClick={handleCancelEdit}>
                                     취소
                                   </button>
                                 </div>
@@ -959,6 +974,13 @@ function DetailPage() {
           getBedInfo={getBedInfo}
         />
       )}
+
+      <PredictionLoadingModal
+        isOpen={showPredictionLoading}
+        predictionType={loadingPredictionType}
+        onClose={handlePredictionLoadingClose}
+        minDisplayTime={2700}
+      />
     </div>
   );
 }

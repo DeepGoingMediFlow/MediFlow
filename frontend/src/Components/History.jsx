@@ -169,9 +169,9 @@ export default function History({ patient, onClose }) {
         {/* 헤더 */}
         <div className="history-header">
           <div className="patient-header">
-            <div className="patient-info">
-              <h2 className="His-patient-name">{patientName}</h2>
-              <span className="patient-id">[{patientPid}]</span>
+            <div className="history-patient-info">
+              <h2 className="history-patient-name">{patientName}</h2>
+              <span className="history-patient-id">[{patientPid}]</span>
             </div>
             <button className="close-button2" onClick={onClose}>
               <X size={20} />
@@ -220,7 +220,7 @@ export default function History({ patient, onClose }) {
                             >
                               저장
                             </button>
-                            <button className="cancel-btn" onClick={handleCancelEdit}>
+                            <button className="history-cancel-btn" onClick={handleCancelEdit}>
                               취소
                             </button>
                           </div>
