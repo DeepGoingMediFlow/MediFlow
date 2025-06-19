@@ -1,0 +1,219 @@
+/* 모달 배경 오버레이 */
+.user-update-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 9998;
+}
+
+/* 모달 컨테이너 */
+.user-update-modal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 370px;
+  height: auto;
+  max-height: 90vh;
+  border-radius: 10px;
+  background-color: white;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  overflow: hidden;
+  border: 1px solid #e5e7eb;
+  z-index: 9999;
+}
+
+.user-update-content {
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+/* 헤더 */
+.user-update-header {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 12px 20px;
+  position: relative;
+}
+
+.user-update-title {
+  font-size: 20px;
+  font-weight: bold;
+  color: #111827;
+  margin: 0;
+}
+
+.user-update-close-button {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 2px;
+  border-radius: 4px;
+  position: absolute;
+  right: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.user-update-close-button:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+.user-update-close-icon {
+  width: 16px;
+  height: 16px;
+  color: #6b7280;
+}
+
+/* 폼 영역 */
+.user-update-form {
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  border: 1.5px solid #3b82f6;
+  border-radius: 8px;
+  margin: 10px 20px 0 20px;
+  background-color: white;
+  overflow: hidden;
+}
+
+/* 입력 필드 그룹 */
+.user-update-input-group {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  border-bottom: 1px solid #e5e7eb;
+  padding: 12px 15px;
+  min-height: 45px;
+}
+
+.user-update-input-group:last-of-type {
+  border-bottom: none;
+  padding-bottom: 15px;
+}
+
+.user-update-input-label {
+  font-size: 16px;
+  font-weight: bold;
+  color: #374151;
+  margin-bottom: 0;
+  margin-right: 15px;
+  min-width: 60px;
+  flex-shrink: 0;
+}
+
+.user-update-input-field {
+  width: 100%;
+  padding: 0;
+  border: none;
+  font-size: 17px;
+  color: #111827;
+  outline: none;
+  box-sizing: border-box;
+  background: transparent;
+  margin-top: 0;
+  flex: 1;
+}
+
+.user-update-input-field:focus {
+  outline: none;
+}
+
+.user-update-input-field::placeholder {
+  color: #9ca3af;
+  font-size: 15px;
+}
+
+/* 라디오 버튼 그룹 */
+.user-update-radio-group {
+  display: flex;
+  gap: 15px;
+  margin-top: 0;
+  flex: 1;
+}
+
+.user-update-radio-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.user-update-radio-input {
+  width: 14px;
+  height: 14px;
+  cursor: pointer;
+  accent-color: #3b82f6;
+}
+
+.user-update-radio-label {
+  font-size: 13px;
+  color: #374151;
+  cursor: pointer;
+}
+
+/* 버튼 영역 */
+.user-update-button-container {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  padding: 15px 20px 20px 20px;
+}
+
+.user-update-submit-button {
+  background-color: #3b82f6;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 6px 16px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  min-width: 50px;
+}
+
+.user-update-submit-button-del {
+  background-color: #979797;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 6px 16px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  min-width: 50px;
+}
+
+.user-update-submit-button:hover {
+  background-color: #2563eb;
+}
+
+.user-update-submit-button:active {
+  background-color: #1d4ed8;
+}
+
+.user-update-submit-button-del:hover {
+  background-color: #6b7280;
+}
+
+/* 반응형 */
+@media (max-width: 480px) {
+  .user-update-modal {
+    width: 260px;
+  }
+
+  .user-update-form {
+    margin: 10px 15px 0 15px;
+  }
+
+  .user-update-radio-group {
+    gap: 12px;
+  }
+}

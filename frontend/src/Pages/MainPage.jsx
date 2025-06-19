@@ -17,6 +17,7 @@ const MainPage = () => {
   const [selectedPatient, setSelectedPatient] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [labelFilter, setLabelFilter] = useState('전체');
+  const [bedFilter, setBedFilter] = useState('all');
   const [showEmergencyRoomLayout, setShowEmergencyRoomLayout] = useState(false);
   const [bedStatus, setBedStatus] = useState(null);
   const [patientData, setPatientData] = useState([]);
@@ -38,7 +39,8 @@ const MainPage = () => {
           complaint: p.chiefComplaint,
           label: p.label === 2 ? '위험' : (p.label === 1 ? '주의' : '경미'),
           history: '확인',
-          visitId: p.visitId
+          visitId: p.visitId,
+          admissionTime: p.admissionTime
         }));
         console.log(transformed);
         setPatientData(transformed);
@@ -56,6 +58,29 @@ const MainPage = () => {
   // 침대가 배정된 환자 수 계산 (null, undefined, 빈 문자열이 아닌 경우)
   const bedAssignedCount = patientData.filter(p => p.bed && p.bed !== '').length;
 
+  // 입실시간 포맷팅 함수
+  const formatAdmissionTime = (admissionTime) => {
+    if (!admissionTime) return '-';
+    const date = new Date(admissionTime);
+    const year = String(date.getFullYear()).slice(2).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    return `${year}/${month}/${day} ${hours}:${minutes}`;
+  };
+
+  // 전체 환자 버튼 클릭 핸들러
+  const handleAllPatientsClick = () => {
+    setBedFilter('all');
+    setLabelFilter('전체');
+  };
+
+  // 침대 배정 환자 버튼 클릭 핸들러  
+  const handleBedAssignedClick = () => {
+    setBedFilter('assigned');
+    setLabelFilter('전체');
+  };
 
   // 필터링(주의,위험,전체)환자보기
   const handleWarningClick = () => {
@@ -68,6 +93,7 @@ const MainPage = () => {
 
   const resetFilter = () => {
     setLabelFilter('전체');
+    setBedFilter('all');
   };
 
   // 리스트 전환 토글
@@ -114,7 +140,7 @@ const MainPage = () => {
     }
   };
 
-  // 필터링
+  // 필터링 (검색어, 라벨, 침대 배정 상태 모두 적용)
   const filteredPatients = patientData.filter((patient) => {
     const matchesSearch =
       patient.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -122,7 +148,11 @@ const MainPage = () => {
 
     const matchesLabel = labelFilter === '전체' ? true : patient.label === labelFilter;
 
-    return matchesSearch && matchesLabel;
+    // 침대 필터 조건 추가
+    const matchesBedFilter = bedFilter === 'all' ? true :
+      (bedFilter === 'assigned' ? (patient.bed && patient.bed !== '') : true);
+
+    return matchesSearch && matchesLabel && matchesBedFilter;
   });
 
   // 디버깅용 useEffect
@@ -130,9 +160,10 @@ const MainPage = () => {
     console.log("=== 진단용 출력 ===");
     console.log("검색어:", searchTerm);
     console.log("라벨 필터:", labelFilter);
+    console.log("침대 필터:", bedFilter);
     console.log("전체 환자 수:", patientData.length);
     console.log("필터링 후:", filteredPatients.length);
-  }, [searchTerm, labelFilter, patientData, filteredPatients]);
+  }, [searchTerm, labelFilter, bedFilter, patientData, filteredPatients]);
 
   return (
     <div className="medical-dashboard">
@@ -168,7 +199,7 @@ const MainPage = () => {
 
         {/* Stats Cards */}
         <div className="stats-grid">
-          <div className="stat-card">
+          <div className={`stat-card ${bedFilter === 'all' ? 'stat-card-active' : ''}`} onClick={handleAllPatientsClick}>
             <div className="stat-content">
               <Users className="stat-icon blue" />
               <div>
@@ -177,7 +208,7 @@ const MainPage = () => {
             </div>
           </div>
 
-          <div className="stat-card">
+          <div className={`stat-card ${bedFilter === 'assigned' ? 'stat-card-active' : ''}`} onClick={handleBedAssignedClick}>
             <div className="stat-content">
               <Bed className="stat-icon blue" />
               <div>
@@ -211,7 +242,7 @@ const MainPage = () => {
         < div className="toggle-container" >
           <div className="toggle-wrapper">
             <span className="toggle-label">
-              {showEmergencyRoomLayout ? '환자 리스트 보기' : '응급실 배치도 보기'}
+              {showEmergencyRoomLayout ? '응급실 배치도' : '환자 리스트'}
             </span>
             <div className={`toggle-switch ${showEmergencyRoomLayout ? 'active' : ''}`} onClick={handleToggle}>
               <div className="toggle-slider"></div>
@@ -243,6 +274,7 @@ const MainPage = () => {
                 <table className="table">
                   <thead className="table-header">
                     <tr>
+                      <th className="table-header-cell">Admission Time</th>
                       <th className="table-header-cell">PID</th>
                       <th className="table-header-cell">Name</th>
                       <th className="table-header-cell">Age</th>
@@ -257,6 +289,7 @@ const MainPage = () => {
                   <tbody>
                     {filteredPatients.slice(0, 20).map((patient) => (
                       <tr key={patient.pid} className="table-row">
+                        <td className="table-cell" onClick={() => goToDetail(patient)}>{formatAdmissionTime(patient.admissionTime)}</td>
                         <td className="table-cell" onClick={() => goToDetail(patient)}>{patient.pid}</td>
                         <td className="table-cell" onClick={() => goToDetail(patient)}>{patient.name}</td>
                         <td className="table-cell" onClick={() => goToDetail(patient)}>{patient.age}</td>

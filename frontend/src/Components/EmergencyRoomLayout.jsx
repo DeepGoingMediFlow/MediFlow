@@ -162,6 +162,16 @@ const EmergencyRoomLayout = ({
     setLongPressConfirmPatient(null);
   };
 
+  // 최종 배치 하러 가기 버튼 핸들러
+  const handleGoToDisposition = () => {
+    if (unassignPatient && onPatientClick) {
+      // 모달을 먼저 닫고
+      closeUnassignModal();
+      // 환자 디테일 페이지로 이동
+      onPatientClick(unassignPatient);
+    }
+  };
+
   // 환자 배정 처리 - 백엔드 API 호출
   const handlePatientAssign = async (patient) => {
     setLoading(true);
@@ -364,7 +374,7 @@ const EmergencyRoomLayout = ({
       {/* 환자 배정 모달 */}
       {showAssignModal && (
         <div className="modal-overlay">
-          <div className="modal-content">
+          <div className="add-modal-content">
             <div className="modal-header">
               <h3 className="modal-title">
                 병상 {selectedBed} 환자 배정
@@ -493,12 +503,8 @@ const EmergencyRoomLayout = ({
 
                   <div className="disposition-buttons">
                     <button
-                      className="btn-primary"
-                      onClick={() => {
-                        // 최종 배치 페이지로 이동하는 로직 (부모 컴포넌트에서 처리)
-                        closeUnassignModal();
-                        // onGoToDisposition 같은 콜백으로 처리
-                      }}
+                      className="btn-primary_final"
+                      onClick={handleGoToDisposition}
                       disabled={loading}
                     >
                       최종 배치 하러 가기

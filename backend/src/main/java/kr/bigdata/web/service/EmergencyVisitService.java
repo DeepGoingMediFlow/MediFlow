@@ -8,10 +8,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import jakarta.transaction.Transactional;
-import kr.bigdata.web.dto.BedStatusDto;
-import kr.bigdata.web.entity.AiPrediction;
 import kr.bigdata.web.entity.AvailableBeds;
-import kr.bigdata.web.entity.BedInfo;
 import kr.bigdata.web.entity.EmergencyVisit;
 import kr.bigdata.web.entity.MedicalHistory;
 import kr.bigdata.web.repository.AiPredictionRepository;
@@ -43,20 +40,20 @@ public class EmergencyVisitService {
 
 	// 응급실 침대 occupied
 	private void occupyERBed(String bedNumber) {
-        if (bedNumber != null && !bedNumber.isEmpty()) {
-            bedInfoRepository.findByBedNumber(bedNumber).ifPresent(bed -> {
-                bed.setStatus("OCCUPIED");
-                bedInfoRepository.save(bed);
+		if (bedNumber != null && !bedNumber.isEmpty()) {
+			bedInfoRepository.findByBedNumber(bedNumber).ifPresent(bed -> {
+				bed.setStatus("OCCUPIED");
+				bedInfoRepository.save(bed);
 			});
 		}
 	}
 
 	// 응급실 침대 available
 	private void releaseERBed(String bedNumber) {
-        if (bedNumber != null && !bedNumber.isEmpty()) {
-            bedInfoRepository.findByBedNumber(bedNumber).ifPresent(bed -> {
-                bed.setStatus("AVAILABLE");
-                bedInfoRepository.save(bed);
+		if (bedNumber != null && !bedNumber.isEmpty()) {
+			bedInfoRepository.findByBedNumber(bedNumber).ifPresent(bed -> {
+				bed.setStatus("AVAILABLE");
+				bedInfoRepository.save(bed);
 			});
 		}
 	}
@@ -71,18 +68,21 @@ public class EmergencyVisitService {
 		}
 		EmergencyVisit visit = optVisit.get();
 
-		 // 퇴실시간 저장 + 침대 해제
-        if (disposition != null && (disposition == 0 || disposition == 1 || disposition == 2)) {
-            String bedNumber = visit.getBedNumber();
-            visit.setDischargeTime(LocalDateTime.now());
-            
-            if (bedNumber != null && !bedNumber.isEmpty()) {
-                releaseERBed(bedNumber);
-                visit.setBedNumber(null); // 배정 해제!
-            }
-        }
+		// 2. final_disposition 설정 (모든 경우에 대해)
+		visit.setFinalDisposition(disposition);
 
-		// 일반/ICU 배치 때 available_beds 감소
+		// 3. 퇴실시간 저장 + 침대 해제 (모든 배치 확정시)
+		if (disposition != null && (disposition == 0 || disposition == 1 || disposition == 2)) {
+			String bedNumber = visit.getBedNumber();
+			visit.setDischargeTime(LocalDateTime.now());
+
+			if (bedNumber != null && !bedNumber.isEmpty()) {
+				releaseERBed(bedNumber);
+				visit.setBedNumber(null); // 배정 해제!
+			}
+		}
+
+		// 4. 일반/ICU 배치 때 available_beds 감소
 		if (disposition != null && (disposition == 1 || disposition == 2)) {
 			String wardType = (disposition == 1) ? "WARD" : "ICU";
 			AvailableBeds beds = availableBedsRepository.findTopByWardTypeOrderByUpdatedTimeDesc(wardType);
@@ -93,53 +93,22 @@ public class EmergencyVisitService {
 			}
 		}
 
-		// DB 저장
+		// 5. 상태를 DISCHARGED로 변경
 		visit.setStatus("DISCHARGED");
+
+		// 6. DB 저장
 		emergencyVisitRepository.save(visit);
 
-		// 4. MedicalHistory 테이블 content에 resaon 저장
+		// 7. MedicalHistory 테이블 content에 reason 저장
 		if (reason != null && !reason.trim().isEmpty()) {
 			MedicalHistory history = new MedicalHistory();
 			history.setVisitId(visitId);
-			history.setContent("[최종 배치 사유] " + reason);
+			history.setContent("[최종 배치] " + reason);
 			// 로그인 사용자 아이디 기록
 			String currentUserId = SecurityContextHolder.getContext().getAuthentication().getName();
 			history.setUserId(currentUserId);
 			medicalHistoryRepository.save(history);
 		}
-	}
-
-	// 병동 병상 정보 조회
-	 public BedStatusDto getAvailableBedInfoForVisit(String visitId) {
-	        Optional<AiPrediction> predOpt = aiPredictionRepository
-	                .findTopByEmergencyVisit_VisitIdAndPreTypeOrderByPreTimeDesc(visitId, "DISCHARGE");
-
-	        if (!predOpt.isPresent()) {
-			// 예측 결과 자체가 없음(정보 없음)
-			return null;
-		}
-
-		AiPrediction pred = predOpt.get();
-		int dispo = pred.getPreDisposition();
-
-		// 일반/ICU만 병상 제공, 그 외는 null 반환
-		// 프론트는 병상 관련 UI 자체를 숨기거나 "정보 없음"으로 표시해주세요!
-		String wardType;
-		if (dispo == 1) {
-			wardType = "WARD";
-		} else if (dispo == 2) {
-			wardType = "ICU";
-		} else {
-			// 퇴원, 귀가, 기타 disposition: 아예 정보 없음
-			return null;
-		}
-
-		AvailableBeds bed = availableBedsRepository.findTopByWardTypeOrderByUpdatedTimeDesc(wardType);
-
-		if (bed == null)
-			return new BedStatusDto(wardType, null, null);
-
-		return new BedStatusDto(wardType, bed.getAvailableCount(), bed.getTotalBeds());
 	}
 
 	// 최종 배치 수정
@@ -148,7 +117,7 @@ public class EmergencyVisitService {
 
 		// 파라미터 확인
 		System.out.println("=== updateDisposition 호출됨 ===");
-		System.out.println("visitId: " + visitId + ", disposition: " + disposition);
+		System.out.println("visitId: " + visitId + ", disposition: " + disposition + ", reason: " + reason);
 
 		Optional<EmergencyVisit> optVisit = emergencyVisitRepository.findById(visitId);
 		if (!optVisit.isPresent()) {
@@ -159,67 +128,62 @@ public class EmergencyVisitService {
 
 		// 최종 배치 수정 status -> discharged로 변경
 		visit.setStatus("DISCHARGED");
-		
-		 // 응급실 침대 available
-        if (disposition != null && (disposition == 0 || disposition == 1 || disposition == 2)) {
-            String bedNumber = visit.getBedNumber();
-            visit.setDischargeTime(LocalDateTime.now());
-            if (bedNumber != null && !bedNumber.isEmpty()) {
-                releaseERBed(bedNumber);
-                visit.setBedNumber(null); // 배정 해제!
-            }
-        }
 
-		// 응급실 침대 occupied
-		if (disposition != null && (disposition == 1 || disposition == 2)) {
-			occupyERBed(visit.getBedNumber());
-		}
+		// 응급실 침대 처리 - 퇴실/전원/사망시에만 침대 해제
+		if (disposition != null && (disposition == 0 || disposition == 1 || disposition == 2)) {
+			String bedNumber = visit.getBedNumber();
+			visit.setDischargeTime(LocalDateTime.now());
 
-		// 전체 병동 병상 복구(+1)
-		if (prevDisposition != null && (prevDisposition == 1 || prevDisposition == 2)) {
-			String wardType = (prevDisposition == 1) ? "WARD" : "ICU";
-			AvailableBeds beds = availableBedsRepository.findTopByWardTypeOrderByUpdatedTimeDesc(wardType);
-			if (beds != null) {
-				beds.setAvailableCount(beds.getAvailableCount() + 1);
-				beds.setUpdatedTime(LocalDateTime.now());
-				availableBedsRepository.save(beds);
+			if (bedNumber != null && !bedNumber.isEmpty()) {
+				releaseERBed(bedNumber);
+				visit.setBedNumber(null); // 배정 해제
+				System.out.println("응급실 침대 해제: " + bedNumber);
 			}
 		}
 
-		// 신규 배치시 전체 병동 가용병상 -1
+		// 일반병동/ICU 입원시 해당 병동 가용병상 감소
 		if (disposition != null && (disposition == 1 || disposition == 2)) {
 			String wardType = (disposition == 1) ? "WARD" : "ICU";
 			AvailableBeds beds = availableBedsRepository.findTopByWardTypeOrderByUpdatedTimeDesc(wardType);
+
 			// 음수 방지, available_count가 1 이상일 때만 감소
 			if (beds != null && beds.getAvailableCount() > 0) {
-				System.out.println("감소 전: " + beds.getAvailableCount());
-				beds.setAvailableCount(beds.getAvailableCount() - 1); // 자동 -1
-				System.out.println("감소 후: " + beds.getAvailableCount());
+				System.out.println(wardType + " 병상 수 감소 전: " + beds.getAvailableCount());
+				beds.setAvailableCount(beds.getAvailableCount() - 1);
+				System.out.println(wardType + " 병상 수 감소 후: " + beds.getAvailableCount());
 				beds.setUpdatedTime(LocalDateTime.now());
 				availableBedsRepository.save(beds);
-				System.out.println("SAVE 직후 availableCount: " + beds.getAvailableCount());
+			} else {
+				System.out.println(wardType + " 가용 병상이 없습니다.");
 			}
 		}
 
-		// 2. setFinalDisposition 앞뒤에 로그!
-		System.out.println("직전 finalDisposition: " + visit.getFinalDisposition());
+		// finalDisposition 설정
+		System.out.println("변경 전 finalDisposition: " + visit.getFinalDisposition());
 		visit.setFinalDisposition(disposition);
 		System.out.println("변경 후 finalDisposition: " + visit.getFinalDisposition());
 
+		// 방문 정보 저장
 		emergencyVisitRepository.save(visit);
-		System.out.println("emergencyVisitRepository.save(visit) 호출 완료!");
-		// 4. save 호출 후 로그!
+		System.out.println("emergencyVisitRepository.save(visit) 완료!");
 
-		// MedicalHistory 이력
-		String log = String.format("[최종 배치 수정] 이전:%s → 변경:%s. 사유:%s", prevDisposition, disposition, reason);
-		MedicalHistory history = new MedicalHistory();
-		history.setVisitId(visitId);
-		history.setContent(log);
+		// MedicalHistory 이력 저장
+		if (reason != null && !reason.trim().isEmpty()) {
+			MedicalHistory history = new MedicalHistory();
+			history.setVisitId(visitId);
 
-		String currentUserId = SecurityContextHolder.getContext().getAuthentication().getName();
+			// 이전 배치와 현재 배치 정보를 포함한 로그
+			String dispositionText = getDispositionText(disposition);
+			String prevDispositionText = getDispositionText(prevDisposition);
+			history.setContent("[최종 배치 수정] " + reason);
 
-		history.setUserId(currentUserId);
-		medicalHistoryRepository.save(history);
+			// 로그인 사용자 아이디 기록
+			String currentUserId = SecurityContextHolder.getContext().getAuthentication().getName();
+			history.setUserId(currentUserId);
+			medicalHistoryRepository.save(history);
+
+			System.out.println("MedicalHistory 저장 완료: " + reason);
+		}
 	}
 
 	// 최종 배치 삭제
@@ -248,12 +212,28 @@ public class EmergencyVisitService {
 		// MedicalHistory 이력
 		MedicalHistory history = new MedicalHistory();
 		history.setVisitId(visitId);
-		history.setContent("[최종 배치 삭제] 이전:" + prevDisposition);
+		history.setContent("이전:" + prevDisposition);
 
 		String currentUserId = SecurityContextHolder.getContext().getAuthentication().getName();
 
 		history.setUserId(currentUserId);
 		medicalHistoryRepository.save(history);
+	}
+
+	// disposition 코드를 텍스트로 변환하는 헬퍼 메서드
+	private String getDispositionText(Integer disposition) {
+		if (disposition == null)
+			return "미정";
+		switch (disposition) {
+		case 0:
+			return "퇴실";
+		case 1:
+			return "일반병동 입원";
+		case 2:
+			return "중환자실 입원";
+		default:
+			return "알 수 없음(" + disposition + ")";
+		}
 	}
 
 }
