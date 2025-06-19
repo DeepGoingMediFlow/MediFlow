@@ -14,7 +14,7 @@ import kr.bigdata.web.entity.Patient;
 @Repository
 public interface PatientRepository extends JpaRepository<Patient, String> {
 
-	// 환자 목록 조회 - ADMISSION_TIME 추가
+	// 환자 목록 조회
 	@Query(value = """
 	    SELECT
 	        p.PATIENT_ID as pid,
@@ -29,7 +29,6 @@ public interface PatientRepository extends JpaRepository<Patient, String> {
 	            WHEN ev.FINAL_DISPOSITION IS NOT NULL THEN ev.FINAL_DISPOSITION
 	            WHEN discharge_pred.PRE_DISPOSITION IS NOT NULL THEN discharge_pred.PRE_DISPOSITION
 	            WHEN admission_pred.PRE_DISPOSITION IS NOT NULL THEN admission_pred.PRE_DISPOSITION
-	            ELSE 0
 	        END as SIGNED) as label,
 	        CASE
 	            WHEN ev.FINAL_DISPOSITION IS NOT NULL THEN 'FINAL'

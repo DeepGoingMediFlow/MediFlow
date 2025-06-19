@@ -1,0 +1,268 @@
+/* ========== Admin 페이지 기본 스타일 ========== */
+.admin-page {
+  background-color: #f0f4f8;
+}
+
+/* Admin 페이지만의 로고 텍스트 색상 */
+.admin-page .logo-text {
+  color: #8251f4;
+}
+
+/* Admin 페이지만의 사용자 정보 스타일 */
+.admin-page .admin-user-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.admin-page .admin-user-icon {
+  width: 35px;
+  height: 35px;
+}
+
+.admin-page .admin-user-name {
+  color: #8251f4;
+  font-size: 20px;
+  font-weight: 800;
+}
+
+/* ========== 그래프 섹션 ========== */
+.admin-graph-section {
+  background-color: white;
+  margin: 20px;
+  margin-top: 0px;
+  margin-bottom: 30px;
+  border-radius: 15px;
+  overflow: hidden;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* 그래프 탭 버튼들 */
+.admin-graph-tabs {
+  display: flex;
+  background-color: #f8f9fa;
+  border-bottom: 1px solid #e1e5e9;
+}
+
+.admin-tab {
+  flex: 1;
+  padding: 15px 20px;
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: 500;
+  color: #666;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.admin-tab:hover {
+  background-color: #f0f0f0;
+  color: #333;
+}
+
+.admin-tab.active {
+  color: #8251f4;
+  background-color: white;
+  font-weight: 600;
+}
+
+.admin-tab.active::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background-color: #8251f4;
+}
+
+/* 그래프 컨텐츠 영역 */
+.admin-graph-content {
+  padding: 20px;
+  min-height: 400px;
+}
+
+/* 그래프 상단 제목 */
+.admin-graph-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+  margin-left: 33px;
+  font-weight: bold;
+  font-size: 18px;
+  color: #333;
+}
+
+/* ========== 테이블 섹션 ========== */
+.admin-table-section {
+  border-radius: 15px;
+  padding: 20px;
+}
+
+/* 테이블 상단 제목 + 버튼 */
+.admin-table-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+  margin-left: 15px;
+  font-weight: bold;
+  font-size: 18px;
+  color: #333;
+}
+
+.admin-add-button {
+  background-color: #9a74f3;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background-color 0.2s;
+}
+
+.admin-add-button:hover {
+  background-color: #3a73e8;
+}
+
+/* 테이블 스크롤 래퍼 */
+.admin-table-scroll-wrapper {
+  max-height: 400px;
+  overflow-y: auto;
+  border-radius: 12px;
+  background-color: white;
+  border: 1px solid #e1e5e9;
+}
+
+/* 스크롤바 스타일 */
+.admin-table-scroll-wrapper::-webkit-scrollbar {
+  width: 8px;
+}
+
+.admin-table-scroll-wrapper::-webkit-scrollbar-thumb {
+  background-color: #4e89ff;
+  border-radius: 4px;
+}
+
+.admin-table-scroll-wrapper::-webkit-scrollbar-track {
+  background-color: #f1f1f1;
+}
+
+/* 테이블 기본 스타일 */
+.admin-user-table {
+  width: 100%;
+  border-collapse: collapse;
+  overflow: hidden;
+  border-radius: 12px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* 테이블 헤더 */
+.admin-user-table thead {
+  background-color: #e1d1eb;
+}
+
+.admin-user-table th {
+  text-align: center;
+  padding: 15px 12px;
+  font-size: 15px;
+  color: #333;
+  font-weight: 600;
+}
+
+/* 테이블 데이터 */
+.admin-user-table td {
+  text-align: center;
+  padding: 12px;
+  font-size: 14px;
+  color: #333;
+  border-bottom: 1px solid #e1e5e9;
+}
+
+/* 테이블 행 스타일 */
+.admin-user-table tbody tr:nth-child(even) {
+  background-color: #f9f9f9;
+}
+
+.admin-user-table tbody tr:nth-child(odd) {
+  background-color: #ffffff;
+}
+
+.admin-user-table tbody tr:hover {
+  background-color: #f0f7ff;
+}
+
+/* 클릭 가능한 이름 스타일 */
+.admin-clickable-name {
+  cursor: pointer;
+  color: #2563eb;
+  transition: color 0.2s;
+  font-weight: 500;
+}
+
+.admin-clickable-name:hover {
+  color: #1d4ed8;
+  text-decoration: underline;
+}
+
+/* ========== 페이지네이션 ========== */
+.admin-pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 15px;
+  margin-top: 20px;
+  font-size: 14px;
+}
+
+.admin-pagination button {
+  background-color: #f0f4f8;
+  color: black;
+  border: none;
+  padding: 8px 12px;
+  cursor: pointer;
+}
+
+.admin-pagination button:hover {
+  color: #3a73e8;
+}
+
+.admin-pagination span {
+  font-weight: bold;
+  padding: 8px 12px;
+}
+
+/* ========== 반응형 디자인 ========== */
+@media (max-width: 768px) {
+  .admin-table-section {
+    padding: 15px;
+  }
+
+  .admin-user-table th,
+  .admin-user-table td {
+    padding: 8px;
+    font-size: 12px;
+  }
+
+  .admin-pagination {
+    gap: 10px;
+  }
+
+  .admin-pagination button {
+    padding: 6px 10px;
+    font-size: 12px;
+  }
+
+  .admin-graph-tabs {
+    flex-direction: column;
+  }
+
+  .admin-tab {
+    text-align: center;
+  }
+}

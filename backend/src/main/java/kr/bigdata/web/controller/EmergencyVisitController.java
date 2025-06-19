@@ -16,7 +16,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
-import kr.bigdata.web.dto.BedStatusDto;
 import kr.bigdata.web.dto.FinalizeDispositionRequest;
 import kr.bigdata.web.dto.VisitDetailDto;
 import kr.bigdata.web.dto.VisitSummaryDto;
@@ -29,79 +28,70 @@ import kr.bigdata.web.service.EmergencyVisitService;
 @RequestMapping("/api")
 public class EmergencyVisitController {
 
-	private final EmergencyVisitRepository emergencyVisitRepository;
-	private final EmergencyVisitService emergencyVisitService;
+   private final EmergencyVisitRepository emergencyVisitRepository;
+   private final EmergencyVisitService emergencyVisitService;
 
-	@Autowired
-	public EmergencyVisitController(EmergencyVisitRepository emergencyVisitRepository,
-			EmergencyVisitService emergencyVisitService) {
-		this.emergencyVisitRepository = emergencyVisitRepository;
-		this.emergencyVisitService = emergencyVisitService;
-	}
+   @Autowired
+   public EmergencyVisitController(EmergencyVisitRepository emergencyVisitRepository,
+         EmergencyVisitService emergencyVisitService) {
+      this.emergencyVisitRepository = emergencyVisitRepository;
+      this.emergencyVisitService = emergencyVisitService;
+   }
 
-	// 환자 방문 요약 리스트 조회
-	@GetMapping("/visits/{patientId}")
-	public ResponseEntity<List<VisitSummaryDto>> getPatientVisitSummaries(@PathVariable String patientId) {
-		List<VisitSummaryDto> summaries = emergencyVisitRepository.findVisitSummariesByPatientId(patientId);
-		return ResponseEntity.ok(summaries);
-	}
+   // 환자 방문 요약 리스트 조회
+   @GetMapping("/visits/{patientId}")
+   public ResponseEntity<List<VisitSummaryDto>> getPatientVisitSummaries(@PathVariable String patientId) {
+      List<VisitSummaryDto> summaries = emergencyVisitRepository.findVisitSummariesByPatientId(patientId);
+      return ResponseEntity.ok(summaries);
+   }
 
-	// 방문 상세 조회
-	@GetMapping("/visit-detail/{visitId}")
-	public ResponseEntity<VisitDetailDto> getVisitDetail(@PathVariable String visitId) {
-		EmergencyVisit visit = emergencyVisitRepository.findById(visitId)
-				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "방문(ADM) 정보 없음"));
+   // 방문 상세 조회
+   @GetMapping("/visit-detail/{visitId}")
+   public ResponseEntity<VisitDetailDto> getVisitDetail(@PathVariable String visitId) {
+      EmergencyVisit visit = emergencyVisitRepository.findById(visitId)
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "방문(ADM) 정보 없음"));
 
-		VisitDetailDto dto = new VisitDetailDto();
-		dto.setVisitId(visit.getVisitId());
-		dto.setPatientId(visit.getPatient().getPatientId()); // FK 맞게!
-		dto.setAdmissionTime(visit.getAdmissionTime());
-		dto.setDischargeTime(visit.getDischargeTime());
-		dto.setAcuity(visit.getAcuity());
-		dto.setPain(visit.getPain());
-		dto.setChiefComplaint(visit.getChiefComplaint());
-		dto.setArrivalTransport(visit.getArrivalTransport());
-		dto.setDiagnosis(visit.getDiagnosis());
-		dto.setFinalDisposition(visit.getFinalDisposition());
-		dto.setBedNumber(visit.getBedNumber());
-		dto.setStatus(visit.getStatus());
-		return ResponseEntity.ok(dto);
-	}
+      VisitDetailDto dto = new VisitDetailDto();
+      dto.setVisitId(visit.getVisitId());
+      dto.setPatientId(visit.getPatient().getPatientId()); // FK 맞게!
+      dto.setAdmissionTime(visit.getAdmissionTime());
+      dto.setDischargeTime(visit.getDischargeTime());
+      dto.setAcuity(visit.getAcuity());
+      dto.setPain(visit.getPain());
+      dto.setChiefComplaint(visit.getChiefComplaint());
+      dto.setArrivalTransport(visit.getArrivalTransport());
+      dto.setDiagnosis(visit.getDiagnosis());
+      dto.setFinalDisposition(visit.getFinalDisposition());
+      dto.setBedNumber(visit.getBedNumber());
+      dto.setStatus(visit.getStatus());
+      return ResponseEntity.ok(dto);
+   }
 
-	// 최종 배치 확정 api
-	@PostMapping("/visits/{visitId}/disposition")
-	public ResponseEntity<?> finalizeDisposition(@PathVariable String visitId,
-			@RequestBody FinalizeDispositionRequest request) {
+   // 최종 배치 확정 api
+   @PostMapping("/visits/{visitId}/disposition")
+   public ResponseEntity<?> finalizeDisposition(@PathVariable String visitId,
+         @RequestBody FinalizeDispositionRequest request) {
 
-		System.out.println("최종 배치 확정 API 호출됨! visitId=" + visitId + ", disposition=" + request.getDisposition());
+      System.out.println("최종 배치 확정 API 호출됨! visitId=" + visitId + ", disposition=" + request.getDisposition());
 
-		emergencyVisitService.finalizeDisposition(visitId, request.getDisposition(), request.getReason());
-		return ResponseEntity.ok().build();
-	}
+      emergencyVisitService.finalizeDisposition(visitId, request.getDisposition(), request.getReason());
+      return ResponseEntity.ok().build();
+   }
 
-	// 전체 병동 병상 조회 api
-	@GetMapping("/visits/{visitId}/available-beds")
-	public ResponseEntity<BedStatusDto> getAvailableBeds(@PathVariable String visitId) {
-		BedStatusDto result = emergencyVisitService.getAvailableBedInfoForVisit(visitId);
-		if (result == null)
-			return ResponseEntity.notFound().build();
-		return ResponseEntity.ok(result);
-	}
+   //  최종 배치 정보 수정 (PUT: 수정)
+   @PutMapping("/visits/{visitId}/disposition")
+   public ResponseEntity<?> updateDisposition(@PathVariable String visitId,
+         @RequestBody FinalizeDispositionRequest request) {
 
-	//  최종 배치 정보 수정 (PUT: 수정)
-	@PutMapping("/visits/{visitId}/disposition")
-	public ResponseEntity<?> updateDisposition(@PathVariable String visitId,
-			@RequestBody FinalizeDispositionRequest request) {
+      emergencyVisitService.updateDisposition(visitId, request.getDisposition(), request.getReason());
+      return ResponseEntity.ok().build();
+   }
 
-		emergencyVisitService.updateDisposition(visitId, request.getDisposition(), request.getReason());
-		return ResponseEntity.ok().build();
-	}
-
-	// 최종 배치 정보 삭제 (DELETE: 취소/초기화)
-	@DeleteMapping("/visits/{visitId}/disposition")
-	public ResponseEntity<?> deleteDisposition(@PathVariable String visitId) {
-		emergencyVisitService.deleteDisposition(visitId);
-		return ResponseEntity.ok().build();
-	}
+   // 최종 배치 정보 삭제 (DELETE: 취소/초기화)
+   @DeleteMapping("/visits/{visitId}/disposition")
+   public ResponseEntity<?> deleteDisposition(@PathVariable String visitId) {
+      emergencyVisitService.deleteDisposition(visitId);
+      return ResponseEntity.ok().build();
+   }
 
 }

@@ -11,6 +11,18 @@ import lombok.Setter;
 @Setter
 public class LabResultDto {
 	
+    // VitalSign 필드
+    private Long recordId;
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    private LocalDateTime recordTime;
+    private Integer hr;
+    private Integer rr;
+    private Double spo2;
+    private Integer sbp;
+    private Integer dbp;
+    private Double bt;
+	
+    // 상세 검사 필드
 	private Long labId;
     private String visitId;
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
@@ -42,8 +54,8 @@ public class LabResultDto {
     private Double crp;
     private Double pt;
     private Double inrPt;
-    private Double ptt;
     private Double dDimer;
+    private Double ptt;
     private Double troponinT;
     private Double ck;
     private Double ckmb;
@@ -55,15 +67,5 @@ public class LabResultDto {
     private Double po2;
     private Double ctco2;
     private Double bcb;
-    
-    // VitalSign 필드
-    private Long recordId;
-    private LocalDateTime recordTime;
-    private Integer hr;
-    private Integer rr;
-    private Double spo2;
-    private Integer sbp;
-    private Integer dbp;
-    private Double bt;
 
 }

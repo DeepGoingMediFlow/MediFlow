@@ -2,13 +2,13 @@ import logo from './logo.svg';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './Components/AuthContext';
 import ProtectedRoute from './Components/ProtectedRoute';
-import Login from './Pages/Login';
+import LoginPage from './Pages/LoginPage';
 import MainPage from './Pages/MainPage';
-import Detail from './Pages/Detail';
-import Admin from './Pages/Admin';
+import DetailPage from './Pages/DetailPage';
+import AdminPage from './Pages/AdminPage';
 import History from './Components/History';
-import UserInfo from './Components/UserInfo';
-import UserUpdate from './Components/UserUpdate';
+import UserUpdateModal from './Modals/UserUpdateModal';
+import UserAddModal from './Modals/UserAddModal';
 
 function App() {
   return (
@@ -17,7 +17,7 @@ function App() {
         <Router>
           <Routes>
             {/* 로그인 페이지 (인증 불필요) */}
-            <Route path="/login" element={<Login />} />
+            <Route path="/login" element={<LoginPage />} />
 
             {/* 보호된 라우트들 */}
             <Route
@@ -32,7 +32,7 @@ function App() {
               path="/detail/:pid"
               element={
                 <ProtectedRoute>
-                  <Detail />
+                  <DetailPage />
                 </ProtectedRoute>
               }
             />
@@ -48,23 +48,23 @@ function App() {
               path="/admin"
               element={
                 <ProtectedRoute>
-                  <Admin />
+                  <AdminPage />
                 </ProtectedRoute>
               }
             />
             <Route
-              path="/userinfo"
+              path="/userupdate"
               element={
                 <ProtectedRoute>
-                  <UserInfo />
+                  <UserUpdateModal />
                 </ProtectedRoute>
               }
             />
             <Route
-              path="/userupdate/:pid"
+              path="/useradd/:pid"
               element={
                 <ProtectedRoute>
-                  <UserUpdate />
+                  <UserAddModal />
                 </ProtectedRoute>
               }
             />

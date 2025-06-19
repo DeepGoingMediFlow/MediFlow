@@ -1,5 +1,3 @@
-/* DischargeModal.css - 환자 퇴실 모달 전용 CSS */
-
 /* 모달 오버레이 */
 .modal-overlay {
   position: fixed;
@@ -326,29 +324,29 @@
     max-height: 90vh;
     margin: 20px;
   }
-  
+
   .modal-header,
   .patient-info-section,
   .warning-section,
   .modal-footer {
     padding: 15px 20px;
   }
-  
+
   .patient-header {
     flex-direction: column;
     align-items: flex-start;
     gap: 15px;
   }
-  
+
   .info-row {
     flex-direction: column;
     gap: 10px;
   }
-  
+
   .patient-name {
     font-size: 20px;
   }
-  
+
   .ktas-badge {
     align-self: flex-start;
   }
@@ -361,17 +359,17 @@
     border-radius: 0;
     max-height: none;
   }
-  
+
   .patient-basic-info {
     flex-direction: column;
     gap: 5px;
   }
-  
+
   .modal-footer {
     flex-direction: column;
     gap: 10px;
   }
-  
+
   .cancel-button,
   .discharge-button {
     width: 100%;

@@ -2,6 +2,8 @@ package kr.bigdata.web.dto;
 
 import java.time.LocalDateTime;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -20,6 +22,7 @@ public class PatientSummaryDto {
     private String visitId;
     private Integer label;
     private String labelSource;
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime admissionTime;
 
     // 기존 생성자 (하위 호환성 유지)
