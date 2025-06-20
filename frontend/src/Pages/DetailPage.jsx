@@ -137,7 +137,6 @@ function DetailPage() {
       });
   };
 
-
   const loadPatientInfo = () => {
     axios.get(`http://localhost:8081/api/visits/${pid}`, {
       withCredentials: true
@@ -643,7 +642,7 @@ function DetailPage() {
                   <div className="info-table-row">
                     <span>{patientInfo?.admissionTime ? formatAdmissionTime(patientInfo.admissionTime) : '-'}</span>
                     <span>{patientInfo?.visitId}</span>
-                    <span>{patientInfo?.bedNumber}</span>
+                    <span>{patientInfo?.bedNumber ? patientInfo.bedNumber : '-'}</span>
                     <span>{patientInfo?.acuity}</span>
                     <span>{patientInfo?.pain}</span>
                     <span>{patientInfo?.chiefComplaint}</span>
