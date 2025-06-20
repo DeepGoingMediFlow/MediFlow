@@ -70,9 +70,9 @@ const PastRecordModal = ({ patientName, pid, onClose }) => {
                 day: '2-digit'
               }) : '날짜 없음',
             adm: `${visit.visitId || Math.random().toString(36).substring(2, 8)}`,
-            bed: visit.bedNumber || visit.bedNusmber || 'N/A', // 오타 수정: bedNusmber -> bedNumber
+            bed: visit.bedNumber || visit.bedNusmber || '-',
             ktas: visit.acuity?.toString() || '3',
-            pain: visit.pain?.toString() || 'N/A',
+            pain: visit.pain?.toString() || '-',
             chiefComplaint: visit.chiefComplaint || '정보 없음',
             arrivalTransport: visit.arrivalTransport || 'Unknown'
           };

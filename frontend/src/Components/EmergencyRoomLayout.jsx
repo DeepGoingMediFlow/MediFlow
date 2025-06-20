@@ -71,7 +71,7 @@ const EmergencyRoomLayout = ({
 
   // 배정되지 않은 환자 목록 업데이트
   useEffect(() => {
-    const unassigned = patientData.filter(patient => !patient.bed || patient.bed === 'N/A' || patient.bed === '');
+    const unassigned = patientData.filter(patient => !patient.bed || patient.bed === 'N/A' || patient.bed === '' || patient.bed === '-');
     setUnassignedPatients(unassigned);
   }, [patientData]);
 

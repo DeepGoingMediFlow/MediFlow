@@ -55,8 +55,8 @@ const MainPage = () => {
   const dangerCount = patientData.filter(p => p.label === '위험').length;
   const warningCount = patientData.filter(p => p.label === '주의').length;
 
-  // 침대가 배정된 환자 수 계산 (null, undefined, 빈 문자열이 아닌 경우)
-  const bedAssignedCount = patientData.filter(p => p.bed && p.bed !== '').length;
+  // 침대가 배정된 환자 수 계산
+  const bedAssignedCount = patientData.filter(p => p.bed && p.bed !== '-').length;
 
   // 입실시간 포맷팅 함수
   const formatAdmissionTime = (admissionTime) => {
@@ -150,7 +150,7 @@ const MainPage = () => {
 
     // 침대 필터 조건 추가
     const matchesBedFilter = bedFilter === 'all' ? true :
-      (bedFilter === 'assigned' ? (patient.bed && patient.bed !== '') : true);
+      (bedFilter === 'assigned' ? (patient.bed && patient.bed !== '-') : true);
 
     return matchesSearch && matchesLabel && matchesBedFilter;
   });
