@@ -34,10 +34,10 @@ const MainPage = () => {
           name: p.name,
           age: p.age,
           sex: p.gender ? 'F' : 'M', // boolean을 성별 문자열로
-          bed: p.bed,
+          bed: p.bed ? p.bed : '-',
           ktas: p.acuity,
           complaint: p.chiefComplaint,
-          label: p.label === 2 ? '위험' : (p.label === 1 ? '주의' : '경미'),
+          label: p.label === 2 ? '위험' : (p.label === 1 ? '주의' : (p.label === 0 ? '경미' : '-')),
           history: '확인',
           visitId: p.visitId,
           admissionTime: p.admissionTime
@@ -134,8 +134,8 @@ const MainPage = () => {
   const getLabelClass = (label) => {
     switch (label) {
       case '위험': return 'label label-danger';
-      case '경미': return 'label label-success';
       case '주의': return 'label label-warning';
+      case '경미': return 'label label-success';
       default: return 'label';
     }
   };

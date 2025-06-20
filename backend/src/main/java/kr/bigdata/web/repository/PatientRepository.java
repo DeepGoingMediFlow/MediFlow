@@ -75,7 +75,7 @@ public interface PatientRepository extends JpaRepository<Patient, String> {
 	            (String) row[7],  // visitId
 	            label,            // label
 	            (String) row[9],  // labelSource
-	            row[10]           // admissionTime - 추가
+	            row[10]           // admissionTime
 	        );
 	    }).collect(Collectors.toList());
 	}
